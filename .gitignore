@@ -1,0 +1,11 @@
+/**/*.png
+/**/*.wav
+/**/*.mp4
+
+AudioVisSnippets/*
+
+stability-sdk/**/*
+
+*.pyc
+
+.env
