@@ -1,3 +1,4 @@
+from typing import List
 import numpy as np
 
 def sample_array(arr, rate):
@@ -16,7 +17,9 @@ def sample_array(arr, rate):
 fps = 24
 
 # times are in sec
-def beats_deforum(beats, adsr_times, adsr_mags, every_n=1):
+# adsr_times = decay, release
+# adsr_mags = on_value, decay_value, off_value
+def beats_deforum(beats, adsr_times: List[float], adsr_mags: List[float], every_n: int = 1):
   decay, release = adsr_times
   on_value, decay_value, off_value = adsr_mags
   frames = [(0, off_value)]
@@ -25,7 +28,16 @@ def beats_deforum(beats, adsr_times, adsr_mags, every_n=1):
     time = round(beats[i], 3)
     keyframes = np.transpose((np.round([time, time + decay, time + decay + release], 3), [on_value, decay_value, off_value]))
     frames.extend([(int(k[0] * fps), k[1]) for k in keyframes])
+  
   frames = sorted(frames, key=lambda x: x[0])
+
+  # remove duplicate time entries
+  found_keyframes = set()
+  for kf, val in frames:
+    if kf in found_keyframes:
+      frames.remove((kf, val))
+    else:
+      found_keyframes.add(kf)
   frames = [f"{frame}:({mag})" for frame, mag in frames]
   return ",".join(frames)
 
@@ -40,4 +52,3 @@ def beats_prompts(beat_times, prompts):
     prompt_idx = 0 if prompt_idx == len(prompts) - 1 else prompt_idx + 1
     res[frame] = prompts[prompt_idx]
   return res
-
