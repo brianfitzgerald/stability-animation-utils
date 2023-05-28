@@ -18,6 +18,11 @@ def sample_array(arr, rate):
         sampled = arr[::rate]
     return sampled
 
+def as_beats(frames):
+    frames = [f"{frame}:({mag})" for frame, mag in frames]
+    return ",".join(frames)
+
+
 class BeatVisuals:
 
     def __init__(self, beats, times, max_frames=1000, fps=24):
@@ -54,9 +59,13 @@ class BeatVisuals:
                 frames.remove((kf, val))
             else:
                 found_keyframes.add(kf)
-        frames = [f"{frame}:({mag})" for frame, mag in frames]
-        return ",".join(frames)
+        return frames
 
+    def as_xy(self, frames):
+        frames = np.array(frames)
+        x, y = frames[:, 0], frames[:, 1]
+        x = x / self.max_frames
+        return x, y
 
     def beats_prompts(self, prompts):
         prompt_idx = 0
