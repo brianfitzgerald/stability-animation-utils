@@ -9,3 +9,5 @@ stability-sdk/**/*
 *.pyc
 
 .env
+
+.DS_Store
