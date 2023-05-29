@@ -25,27 +25,27 @@ def as_beats(frames):
 
 class BeatVisuals:
 
-    def __init__(self, beats, times, max_frames=1000, fps=24):
+    def __init__(self, beats, times, fps=24):
         self.fps = fps
         self.beats = times[beats]
+        self.beats = np.insert(self.beats, 0, 0)
         self.max_frames = int(max(times) * fps)
 
     # times are in sec
     # adsr_times = decay, release
     # adsr_mags = on_value, decay_value, off_value
     def beats_deforum(
-        self, adsr_times: List[float], adsr_mags: List[float], every_n: int = 1
+        self, decay: float, adsr_mags: List[float], every_n: int = 1
     ):
-        decay, release = adsr_times
-        on_value, decay_value, off_value = adsr_mags
-        frames = [(0, off_value)]
+        on_value, off_value = adsr_mags
+        frames = []
         beats = sample_array(self.beats, every_n)
         for i in range(0, len(beats)):
             time = round(beats[i], 3)
             keyframes = np.transpose(
                 (
-                    np.round([time, time + decay, time + decay + release], 3),
-                    [on_value, decay_value, off_value],
+                    [time, time + decay],
+                    [on_value, off_value],
                 )
             )
             frames.extend([(int(k[0] * self.fps), k[1]) for k in keyframes])
@@ -64,7 +64,7 @@ class BeatVisuals:
     def as_xy(self, frames):
         frames = np.array(frames)
         x, y = frames[:, 0], frames[:, 1]
-        x = x / self.max_frames
+        x = x / self.fps
         return x, y
 
     def beats_prompts(self, prompts):
